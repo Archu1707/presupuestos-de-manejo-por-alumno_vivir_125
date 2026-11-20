@@ -1,12 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { PanelApp } from "@/components/presupuestos/PanelApp";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Presupuestos-de-manejo-por-alumno_Vivir_125" },
-      { name: "description", content: "Presupuestos de manejo por alumno – Vivir 125" },
-      { property: "og:title", content: "Presupuestos-de-manejo-por-alumno_Vivir_125" },
-      { property: "og:description", content: "Presupuestos de manejo por alumno – Vivir 125" },
+      { title: "Presupuestos por alumno – Academia de Choferes Vivir 125" },
+      {
+        name: "description",
+        content:
+          "Panel de la secretaría para armar, enviar y hacer seguimiento de presupuestos de cursos de manejo por alumno.",
+      },
+      { property: "og:title", content: "Presupuestos por alumno – Academia de Choferes Vivir 125" },
+      {
+        property: "og:description",
+        content: "Presupuestos de cursos de manejo por categoría de libreta, clases y zona de traslado.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -15,11 +24,5 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <h1 className="text-center text-2xl font-semibold text-foreground">
-        Presupuestos-de-manejo-por-alumno_Vivir_125
-      </h1>
-    </main>
-  );
+  return <PanelApp />;
 }
