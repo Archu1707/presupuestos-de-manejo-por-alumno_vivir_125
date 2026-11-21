@@ -85,6 +85,7 @@ describe("Descuento por volumen", () => {
     const foto = JSON.stringify(reales);
     const pasos = ejecutarPruebaGuiada(reales, HOY);
     expect(pasos.every((p) => p.ok)).toBe(true);
+    expect(pasos.some((p) => p.titulo.includes("Vencido"))).toBe(true);
     expect(JSON.stringify(reales)).toBe(foto);
   });
 });

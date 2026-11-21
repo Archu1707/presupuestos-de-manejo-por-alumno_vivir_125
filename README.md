@@ -188,7 +188,8 @@ Para cerrar también la sesión de la demo, borrá además `vivir125.sesion` en 
   y "Vencen esta semana", contador de resultados y acciones según el estado.
 - **Vista imprimible**: las mismas cifras guardadas que muestra el panel, lista para imprimir o
   guardar como PDF.
-- **Prueba guiada**: ejecuta la verificación del descuento sobre una copia aislada de los datos.
+- **Prueba guiada**: verifica el descuento, el vencimiento a los 15 días y el fallo de guardado
+  sobre una copia aislada de los datos.
 
 ## Reglas de negocio
 
@@ -216,13 +217,54 @@ Para cerrar también la sesión de la demo, borrá además `vivir125.sesion` en 
 
 ## Pruebas
 
-- **Automatizadas** (`npm test`): `src/lib/presupuestos/presupuestos.test.ts`. Incluyen
-  "9 clases + 2 extras NO aplica 10%" y "10 clases SÍ, con extras y traslado completos", usando
-  una copia aislada de datos en memoria. También cubren correo repetido, borrado bloqueado,
-  vencimiento a los 15 días, edición bloqueada y duplicado, fallo de guardado, semilla,
-  persistencia y reinicio de datos.
-- **Guiada**: pestaña **Prueba guiada** → "Ejecutar prueba". Muestra cada paso con su resultado y
-  confirma que los datos reales no cambiaron.
+### Prueba guiada (en la app)
+
+Pestaña **Prueba guiada** → **Ejecutar prueba**. Trabaja sobre una **copia aislada en memoria** de
+los datos (no crea ni modifica clientes o presupuestos reales) y muestra cada paso con ✓ o ✗:
+
+| Paso | Qué comprueba | Resultado esperado |
+| --- | --- | --- |
+| 1 | Copia aislada de datos | Se copian los datos y se crea un cliente de prueba en Neptunia |
+| 2 | 9 clases + 2 extras (categoría A, Neptunia) | Sin descuento: base $U 8.100, extras $U 2.100, traslado $U 900, total $U 11.100 |
+| 3 | 10 clases + 2 extras | 10% solo sobre clases: base $U 9.000, descuento $U 900, extras $U 2.100 y traslado $U 1.000 completos, total $U 11.200 |
+| 4 | Vencimiento | Un presupuesto Enviado hace 15 días sigue **Enviado**; uno enviado hace 16 días pasa a **Vencido** al revisar el panel |
+| 5 | Fallo de guardado simulado | No se muestra éxito y el correlativo no avanza |
+| 6 | Datos reales | Siguen sin cambios después de la prueba |
+
+Las fechas del paso 4 se calculan desde el día en que se ejecuta, así que la prueba da el mismo
+resultado cualquier día.
+
+### Pruebas automatizadas
+
+`npm test` corre `src/lib/presupuestos/presupuestos.test.ts` (Vitest), también sobre datos aislados
+en memoria. Ejecuta la misma prueba guiada (los 6 pasos deben pasar, incluido el de vencimiento) y
+además cubre: descuento con 9 y 10 clases, extras que no cuentan para el umbral, precio de 120 min,
+correo repetido, dominio y espacios en el correo, borrado bloqueado, vencimiento en el día 15 y 16,
+edición bloqueada y duplicado, fallo de guardado, semilla, reinicio de datos y persistencia.
+
+### Cómo verificar el vencimiento a los 15 días
+
+Regla: un presupuesto **Enviado** con **más de 15 días corridos** desde su envío pasa a
+**Vencido** al abrir el panel de **Seguimiento** (el día 15 todavía está Enviado; el 16 ya no).
+
+1. **Prueba guiada**: paso 4 (ver arriba). Es la forma más rápida y no toca tus datos.
+2. **Datos de ejemplo**: pulsá **Reiniciar datos**. P-0004 (enviado hace 20 días) aparece como
+   **Vencido** con el aviso "1 presupuesto(s) pasaron a Vencido", mientras que P-0005 (enviado hace
+   14 días) sigue **Enviado**.
+3. **Con un presupuesto propio**: crealo y pulsá **Marcar Enviado**. Después, en la consola del
+   navegador (F12 → Console), mové su fecha de envío 16 días atrás y recargá:
+
+   ```js
+   const k = "vivir125.presupuestos.v1", d = JSON.parse(localStorage.getItem(k));
+   const p = d.presupuestos.filter((x) => x.estado === "Enviado").sort((a, b) => b.numero - a.numero)[0];
+   const f = new Date(); f.setDate(f.getDate() - 16); p.fechaEnvio = f.toLocaleDateString("sv");
+   localStorage.setItem(k, JSON.stringify(d)); location.reload();
+   ```
+
+   Al abrir **Seguimiento** pasa a **Vencido**. Con `-15` en lugar de `-16` sigue **Enviado**.
+   Al terminar, **Reiniciar datos** deja todo como al principio.
+4. **Automatizada**: `npm test` (pruebas "Enviado con más de 15 días corridos pasa a Vencido" y
+   "la prueba guiada pasa completa").
 
 ## Estructura
 
