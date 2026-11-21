@@ -266,6 +266,14 @@ export class Repositorio {
     return r.ok ? { ok: true, valor: copia } : r;
   }
 
+  /**
+   * Reinicia la simulación: borra clientes y presupuestos actuales y vuelve a
+   * cargar los datos de ejemplo con fechas calculadas desde `hoy`.
+   */
+  reiniciarDatos(hoy: string): Resultado {
+    return this.confirmar(crearSemilla(hoy));
+  }
+
   /** Enviado con más de 15 días corridos desde el envío pasa a Vencido. */
   vencerAutomaticos(hoy: string): number {
     const vencer = (p: Presupuesto) =>

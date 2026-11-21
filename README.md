@@ -7,6 +7,10 @@ traslado.
 > **Demo.** Los datos se guardan solo en el navegador (localStorage), son sintéticos y la app no
 > contacta al negocio ni envía mensajes automáticamente.
 
+Diseño: azul `#1D4E89` como color principal y ámbar `#F2A900` como segundo color de marca
+(franjas, pestaña activa, logo, títulos de sección y botones secundarios), con verde `#2E9E5B` y
+rojo `#D64545` para estados.
+
 Stack: **GitHub** (código) + **Lovable** (edición y vista previa) + **Vercel** (publicación).
 TanStack Start + React + Tailwind CSS.
 
@@ -31,10 +35,6 @@ Otros comandos:
 | `npm run build`   | Compila para producción                                     |
 | `npm run preview` | Sirve la compilación localmente                             |
 
-### Clave de acceso por defecto
-
-`vivir125`
-
 ### Publicar en Vercel
 
 1. En Vercel: **Add New → Project → Import** este repositorio de GitHub.
@@ -45,24 +45,12 @@ Otros comandos:
 
 ---
 
-## Acceso al panel (no es autenticación real)
+## Acceso a la demo
 
-La pantalla de acceso pide una **clave simple escrita en el código**. Sirve para que nadie entre
-por accidente, pero **no es seguridad**: cualquiera que lea el código fuente del sitio puede
-verla, y los datos están en el navegador de cada persona. La propia pantalla lo aclara.
-
-### Cómo cambiar la clave del panel
-
-1. Abrí `src/lib/presupuestos/config.ts`.
-2. Cambiá el valor de `CLAVE_PANEL`:
-
-   ```ts
-   export const CLAVE_PANEL = "nueva-clave";
-   ```
-
-3. Guardá, hacé commit y push (o pedíselo a Lovable). Vercel vuelve a publicar solo.
-
-La sesión se guarda en `sessionStorage`, así que se cierra al cerrar la pestaña o con **Salir**.
+Esta versión de demostración **no tiene contraseña ni usuarios**: la pantalla de inicio solo tiene
+un botón **Entrar**. La sesión se guarda en `sessionStorage` y se cierra al cerrar la pestaña o con
+**Salir**. Si en el futuro hace falta controlar el acceso, debe hacerse con autenticación real
+(por ejemplo Supabase Auth), no con una clave escrita en el código.
 
 ---
 
@@ -79,14 +67,16 @@ La sesión se guarda en `sessionStorage`, así que se cierra al cerrar la pesta�
 - Los precios de la semilla se calculan con el mismo catálogo y la misma función de cálculo que
   usa la app.
 
-**Para volver a cargar la semilla:** en el navegador, abrí las herramientas de desarrollo →
-Application/Almacenamiento → Local Storage → borrá la clave `vivir125.presupuestos.v1` y recargá.
+**Para volver a cargar la semilla:** botón **Reiniciar datos** (arriba a la derecha del panel).
+Pide confirmación, borra los clientes y presupuestos actuales y vuelve a cargar los datos de
+ejemplo con fechas calculadas desde el día de hoy.
 
 ---
 
 ## Pantallas
 
-- **Acceso**: campo "Clave" con el aviso de que no es autenticación real.
+- **Inicio**: botón "Entrar" (demo sin contraseña).
+- **Reiniciar datos**: botón en la cabecera que vuelve a cargar los datos de simulación.
 - **Clientes**: alta (Nombre, Correo, Localidad, Edad, ¿Cómo nos conoció?, Fecha de alta
   automática), lista con buscador y ficha con historial de presupuestos. Botones "Guardar cliente"
   y "Eliminar cliente".
@@ -129,8 +119,8 @@ Application/Almacenamiento → Local Storage → borrá la clave `vivir125.presu
 - **Automatizadas** (`npm test`): `src/lib/presupuestos/presupuestos.test.ts`. Incluyen
   "9 clases + 2 extras NO aplica 10%" y "10 clases SÍ, con extras y traslado completos", usando
   una copia aislada de datos en memoria. También cubren correo repetido, borrado bloqueado,
-  vencimiento a los 15 días, edición bloqueada y duplicado, fallo de guardado, semilla y
-  persistencia.
+  vencimiento a los 15 días, edición bloqueada y duplicado, fallo de guardado, semilla,
+  persistencia y reinicio de datos.
 - **Guiada**: pestaña **Prueba guiada** → "Ejecutar prueba". Muestra cada paso con su resultado y
   confirma que los datos reales no cambiaron.
 
