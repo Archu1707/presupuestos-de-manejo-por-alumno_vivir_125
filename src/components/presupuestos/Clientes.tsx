@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { formatoPesos } from "@/lib/presupuestos/calc";
 import { COMO_NOS_CONOCIO, LOCALIDADES } from "@/lib/presupuestos/catalog";
 import { formatoFecha } from "@/lib/presupuestos/fechas";
-import { numeroPresupuesto, type Cliente } from "@/lib/presupuestos/store";
+import { ESTADOS_ABIERTOS, numeroPresupuesto, type Cliente } from "@/lib/presupuestos/store";
 
 import { useAppDatos } from "./AppDatos";
 import { Aviso, Campo, EstadoBadge, Seccion, SelectNativo } from "./ui";
@@ -220,6 +220,8 @@ function FichaCliente({
   const historial = data.presupuestos
     .filter((p) => p.clienteId === cliente.id)
     .sort((a, b) => b.numero - a.numero);
+  const abiertos = historial.filter((p) => ESTADOS_ABIERTOS.includes(p.estado));
+  const bloqueado = abiertos.length > 0;
 
   return (
     <div className="space-y-4">
@@ -234,10 +236,26 @@ function FichaCliente({
 
       <div className="flex flex-wrap gap-2">
         <Button onClick={onNuevoPresupuesto}>Nuevo presupuesto</Button>
-        <Button variant="outline" className="border-destructive/40 text-destructive hover:bg-destructive/10" onClick={onEliminar}>
+        <Button
+          variant="outline"
+          className="border-destructive/40 text-destructive hover:bg-destructive/10"
+          onClick={onEliminar}
+          disabled={bloqueado}
+          aria-describedby={bloqueado ? "motivo-no-eliminar" : undefined}
+        >
           Eliminar cliente
         </Button>
       </div>
+      {bloqueado && (
+        <div id="motivo-no-eliminar">
+          <Aviso tono="demo">
+            <strong>No se puede eliminar este cliente:</strong> tiene {abiertos.length} presupuesto(s)
+            en Borrador o Enviado ({abiertos.map((p) => `${numeroPresupuesto(p.numero)} ${p.estado}`).join(", ")}).
+            Para poder eliminarlo, los borradores deben eliminarse y los enviados cerrarse como
+            Aceptado o Rechazado (o vencer).
+          </Aviso>
+        </div>
+      )}
       {error && <Aviso tono="error">{error}</Aviso>}
 
       <div>
