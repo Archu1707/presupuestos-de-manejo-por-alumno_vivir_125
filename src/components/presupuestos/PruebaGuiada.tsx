@@ -12,12 +12,14 @@ export function PruebaGuiada() {
   const todoOk = pasos?.every((p) => p.ok);
 
   return (
-    <Seccion titulo="Prueba guiada del descuento">
+    <Seccion titulo="Prueba guiada">
       <div className="space-y-4 text-sm">
         <p className="text-foreground">
           Comprueba la regla del 10%: con <strong>9 clases + 2 extras</strong> no hay descuento
           (los extras no cuentan para el umbral) y con <strong>10 clases</strong> sí, aplicado solo
-          sobre la base de clases, con extras y traslado completos. También simula un fallo de
+          sobre la base de clases, con extras y traslado completos. Comprueba también el{" "}
+          <strong>vencimiento</strong>: un presupuesto Enviado hace 15 días sigue Enviado y uno
+          enviado hace 16 días pasa a Vencido al revisar el panel. Por último simula un fallo de
           guardado.
         </p>
         <Aviso>

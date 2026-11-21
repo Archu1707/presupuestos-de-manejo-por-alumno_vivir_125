@@ -1,9 +1,10 @@
-// Prueba guiada del descuento. Trabaja SIEMPRE sobre una copia aislada en
+// Prueba guiada (descuento y vencimiento). Trabaja SIEMPRE sobre una copia aislada en
 // memoria de los datos: nunca escribe en el localStorage real.
 // La usan la pantalla "Prueba guiada" y la prueba automatizada (vitest).
 
 import { formatoPesos } from "./calc";
-import { recargoPorClase, type ExtraId, type Localidad } from "./catalog";
+import { DIAS_VALIDEZ, recargoPorClase, type ExtraId, type Localidad } from "./catalog";
+import { formatoFecha, sumarDias } from "./fechas";
 import {
   APP_KEY,
   Repositorio,
@@ -93,7 +94,32 @@ export function ejecutarPruebaGuiada(datosReales: AppData, hoy: string): PasoPru
     pasos.push({ titulo: "10 clases → 10% solo sobre clases", detalle: r10.error, ok: false });
   }
 
-  // 4) Fallo de guardado: no cambia correlativo ni agrega presupuesto
+  // 4) Vencimiento: Enviado con 15 días sigue Enviado; con 16 días pasa a Vencido.
+  // Primero se vencen los que ya correspondían en la copia, para contar solo los de la prueba.
+  repo.vencerAutomaticos(hoy);
+  const enviado15 = repo.guardarPresupuesto(base(3), sumarDias(hoy, -DIAS_VALIDEZ), { enviar: true });
+  const enviado16 = repo.guardarPresupuesto(base(3), sumarDias(hoy, -(DIAS_VALIDEZ + 1)), {
+    enviar: true,
+  });
+  if (enviado15.ok && enviado16.ok) {
+    const vencidos = repo.vencerAutomaticos(hoy);
+    const estado = (id: string) => repo.data.presupuestos.find((p) => p.id === id)?.estado;
+    const e15 = estado(enviado15.valor.id);
+    const e16 = estado(enviado16.valor.id);
+    pasos.push({
+      titulo: "Enviado con más de 15 días → Vencido al abrir el panel",
+      detalle: `Enviado el ${formatoFecha(enviado15.valor.fechaEnvio)} (hace 15 días): queda ${e15}. Enviado el ${formatoFecha(enviado16.valor.fechaEnvio)} (hace 16 días): pasa a ${e16}. Al revisar el panel se venció ${vencidos} presupuesto (el de 16 días).`,
+      ok: e15 === "Enviado" && e16 === "Vencido" && vencidos === 1,
+    });
+  } else {
+    pasos.push({
+      titulo: "Enviado con más de 15 días → Vencido al abrir el panel",
+      detalle: !enviado15.ok ? enviado15.error : !enviado16.ok ? enviado16.error : "",
+      ok: false,
+    });
+  }
+
+  // 5) Fallo de guardado: no cambia correlativo ni agrega presupuesto
   const fallo: Almacen = {
     getItem: (k) => copia.getItem(k),
     setItem: () => {
@@ -115,7 +141,7 @@ export function ejecutarPruebaGuiada(datosReales: AppData, hoy: string): PasoPru
     ok: okFallo,
   });
 
-  // 5) Datos reales intactos
+  // 6) Datos reales intactos
   const intactos = JSON.stringify(datosReales) === fotoAntes;
   pasos.push({
     titulo: "Datos reales sin modificar",
