@@ -45,12 +45,56 @@ Otros comandos:
 
 ---
 
-## Acceso a la demo
+## Acceso al panel (contraseña)
 
-Esta versión de demostración **no tiene contraseña ni usuarios**: la pantalla de inicio solo tiene
-un botón **Entrar**. La sesión se guarda en `sessionStorage` y se cierra al cerrar la pestaña o con
-**Salir**. Si en el futuro hace falta controlar el acceso, debe hacerse con autenticación real
-(por ejemplo Supabase Auth), no con una clave escrita en el código.
+Al abrir la app se pide una **contraseña**. Con la correcta se entra con el botón **Entrar**; con
+una incorrecta aparece "Contraseña incorrecta." y el campo se vacía.
+
+### Contraseña actual
+
+| Dato | Valor |
+| --- | --- |
+| Contraseña por defecto | `vivir125` (en minúsculas) |
+| Dónde está definida | `src/lib/presupuestos/config.ts`, constante `CLAVE_PANEL` |
+
+### Cómo obtener la contraseña
+
+- **Desde este README**: la contraseña por defecto es `vivir125`.
+- **Desde el código**: abrí `src/lib/presupuestos/config.ts` (en GitHub o en el editor de Lovable,
+  vista de código) y mirá el valor de `CLAVE_PANEL`. Si alguien la cambió, ese archivo tiene siempre
+  la vigente.
+- Se ignoran los espacios al principio y al final, pero **sí distingue mayúsculas**
+  (`VIVIR125` no entra).
+
+### Cómo cambiar la contraseña
+
+1. Abrí `src/lib/presupuestos/config.ts`.
+2. Cambiá el valor de `CLAVE_PANEL`:
+
+   ```ts
+   export const CLAVE_PANEL = "nueva-clave";
+   ```
+
+3. Guardá y publicá el cambio:
+   - **En GitHub**: commit y push a `main`. Lovable se sincroniza solo y Vercel vuelve a publicar.
+   - **En Lovable**: pedile "Cambiá `CLAVE_PANEL` en `src/lib/presupuestos/config.ts` a
+     `nueva-clave`" o editá el archivo en la vista de código.
+   - **En local**: `npm run dev` toma el cambio al guardar.
+4. Actualizá la tabla "Contraseña actual" de este README para que el equipo la encuentre.
+5. Corré `npm test`: la prueba "solo entra con la contraseña configurada" usa la constante, así
+   que sigue pasando con la clave nueva.
+
+### Sesión
+
+- La sesión se guarda en `sessionStorage` (clave `vivir125.sesion`): mientras la pestaña siga
+  abierta no se vuelve a pedir la contraseña, aunque se recargue la página.
+- Se vuelve a pedir al **cerrar la pestaña** o al pulsar **Salir**.
+- Cambiar la contraseña no cierra las sesiones ya abiertas; se pide la nueva en el próximo ingreso.
+
+> **Importante:** es una clave de demostración escrita en el código, **no es autenticación real**:
+> cualquiera que vea el código fuente del sitio puede leerla y los datos viven en el navegador de
+> cada persona. No usar con datos reales. Si en el futuro hace falta controlar el acceso, debe
+> hacerse con autenticación real (por ejemplo Supabase Auth).
 
 ---
 
@@ -64,7 +108,7 @@ servidor: cada navegador (y cada dispositivo) tiene su propia copia de los datos
 | Clave | Almacenamiento | Qué contiene |
 | --- | --- | --- |
 | `vivir125.presupuestos.v1` | `localStorage` | Clientes, presupuestos y el correlativo (último número de presupuesto usado) |
-| `vivir125.sesion` | `sessionStorage` | Marca de que se pulsó **Entrar** (se borra al cerrar la pestaña o con **Salir**) |
+| `vivir125.sesion` | `sessionStorage` | Marca de que se entró con la contraseña (se borra al cerrar la pestaña o con **Salir**) |
 
 ### Cómo se preparan
 
@@ -117,7 +161,7 @@ clientes con presupuestos abiertos. El próximo presupuesto que se cree será el
 
 ### Opción 1: botón "Reiniciar datos" (recomendada)
 
-1. Entrá al panel con **Entrar**.
+1. Entrá al panel con la contraseña (ver [Acceso al panel](#acceso-al-panel-contraseña)).
 2. Pulsá **Reiniciar datos** (botón ámbar, arriba a la derecha, junto a **Salir**).
 3. Confirmá el aviso del navegador.
 4. Aparece el mensaje "Datos de simulación reiniciados." y la app vuelve a la pestaña
@@ -133,7 +177,7 @@ clientes con presupuestos abiertos. El próximo presupuesto que se cree será el
 
 **Qué no cambia:**
 
-- La sesión sigue abierta (no hace falta volver a pulsar **Entrar**).
+- La sesión sigue abierta (no hace falta volver a escribir la contraseña).
 - Los precios, extras y recargos del catálogo (`catalog.ts`) no se tocan.
 - Solo afecta a este navegador: otros navegadores o dispositivos conservan sus propios datos.
 
@@ -156,8 +200,8 @@ localStorage.removeItem("vivir125.presupuestos.v1");
 location.reload();
 ```
 
-Para cerrar también la sesión de la demo, borrá además `vivir125.sesion` en **Session Storage**
-(o pulsá **Salir**).
+Para cerrar también la sesión (y que vuelva a pedir la contraseña), borrá además `vivir125.sesion`
+en **Session Storage** (o pulsá **Salir**).
 
 ### Cambiar los datos de ejemplo
 
@@ -174,7 +218,7 @@ Para cerrar también la sesión de la demo, borrá además `vivir125.sesion` en 
 
 ## Pantallas
 
-- **Inicio**: botón "Entrar" (demo sin contraseña).
+- **Acceso**: campo "Contraseña" y botón "Entrar", con el aviso de que no es autenticación real.
 - **Reiniciar datos**: botón en la cabecera que vuelve a cargar los datos de simulación (ver
   [Reiniciar la simulación](#reiniciar-la-simulación)).
 - **Clientes**: alta (Nombre, Correo, Localidad, Edad, ¿Cómo nos conoció?, Fecha de alta
@@ -238,9 +282,10 @@ resultado cualquier día.
 
 `npm test` corre `src/lib/presupuestos/presupuestos.test.ts` (Vitest), también sobre datos aislados
 en memoria. Ejecuta la misma prueba guiada (los 6 pasos deben pasar, incluido el de vencimiento) y
-además cubre: descuento con 9 y 10 clases, extras que no cuentan para el umbral, precio de 120 min,
-correo repetido, dominio y espacios en el correo, borrado bloqueado, vencimiento en el día 15 y 16,
-edición bloqueada y duplicado, fallo de guardado, semilla, reinicio de datos y persistencia.
+además cubre: contraseña del panel, descuento con 9 y 10 clases, extras que no cuentan para el
+umbral, precio de 120 min, correo repetido, dominio y espacios en el correo, borrado bloqueado,
+vencimiento en el día 15 y 16, edición bloqueada y duplicado, fallo de guardado, semilla, reinicio
+de datos y persistencia.
 
 ### Cómo verificar el vencimiento a los 15 días
 
