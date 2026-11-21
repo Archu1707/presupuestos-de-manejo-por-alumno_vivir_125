@@ -16,7 +16,8 @@
  *   azul    #1D4E89  -> --primary
  *   fondo   #F5F7FA  -> --background
  *   verde   #2E9E5B  -> --success
- *   ámbar   #F2A900  -> --warning
+ *   ámbar   #F2A900  -> --warning (segundo color de marca: franjas, pestaña activa,
+ *                       logo y botones secundarios en ámbar claro --secondary)
  *   texto   #1B1F24  -> --foreground
  *   rojo    #D64545  -> --destructive
  * Todos los colores en oklch.
@@ -79,8 +80,8 @@
   --popover-foreground: oklch(0.237 0.011 254.1);
   --primary: oklch(0.423 0.111 255.1);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.955 0.013 251.6);
-  --secondary-foreground: oklch(0.423 0.111 255.1);
+  --secondary: oklch(0.95 0.06 88);
+  --secondary-foreground: oklch(0.237 0.011 254.1);
   --muted: oklch(0.955 0.008 256);
   --muted-foreground: oklch(0.503 0.026 256.8);
   --accent: oklch(0.955 0.013 251.6);

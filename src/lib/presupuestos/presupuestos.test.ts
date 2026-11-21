@@ -175,6 +175,18 @@ describe("Estados y persistencia", () => {
     expect(repo.data.clientes).toHaveLength(0);
   });
 
+  it("reiniciar datos vuelve a la semilla y se guarda", () => {
+    const { almacen, repo } = repoAislado();
+    repo.crearCliente(
+      { nombre: "Extra", correo: "extra@example.com", localidad: "Costa", edad: 20, comoNosConocio: "Otro" },
+      HOY,
+    );
+    repo.guardarPresupuesto(input(repo, 2), HOY);
+    expect(repo.reiniciarDatos(HOY).ok).toBe(true);
+    expect(repo.data).toEqual(crearSemilla(HOY));
+    expect(new Repositorio(almacen, HOY).data).toEqual(crearSemilla(HOY));
+  });
+
   it("los datos persisten entre instancias (recarga)", () => {
     const { almacen, repo } = repoAislado();
     repo.guardarPresupuesto(input(repo, 2), HOY);
