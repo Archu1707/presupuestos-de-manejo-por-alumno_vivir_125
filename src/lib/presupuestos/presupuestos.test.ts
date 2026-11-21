@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { calcularTotales } from "./calc";
+import { CLAVE_PANEL, claveCorrecta } from "./config";
 import { sumarDias } from "./fechas";
 import { ejecutarPruebaGuiada } from "./pruebaGuiada";
 import { crearSemilla } from "./semilla";
@@ -87,6 +88,16 @@ describe("Descuento por volumen", () => {
     expect(pasos.every((p) => p.ok)).toBe(true);
     expect(pasos.some((p) => p.titulo.includes("Vencido"))).toBe(true);
     expect(JSON.stringify(reales)).toBe(foto);
+  });
+});
+
+describe("Acceso al panel", () => {
+  it("solo entra con la contraseña configurada", () => {
+    expect(claveCorrecta(CLAVE_PANEL)).toBe(true);
+    expect(claveCorrecta(`  ${CLAVE_PANEL} `)).toBe(true);
+    expect(claveCorrecta("")).toBe(false);
+    expect(claveCorrecta("otra-clave")).toBe(false);
+    expect(claveCorrecta(CLAVE_PANEL.toUpperCase())).toBe(false);
   });
 });
 
